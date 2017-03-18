@@ -1,4 +1,4 @@
-package kennard.com.nytimessearch.activity;
+package com.kennard.nytimesearch.activity;
 
 /**
  * Created by raprasad on 10/24/16.

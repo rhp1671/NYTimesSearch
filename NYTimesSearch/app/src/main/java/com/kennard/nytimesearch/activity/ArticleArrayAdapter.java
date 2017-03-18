@@ -1,8 +1,7 @@
-package kennard.com.nytimessearch;
+package com.kennard.nytimesearch.activity;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +12,8 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+
+import kennard.com.nytimessearch.R;
 
 /**
  * Created by raprasad on 10/24/16.

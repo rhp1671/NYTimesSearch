@@ -1,4 +1,4 @@
-package kennard.com.nytimessearch;
+package com.kennard.nytimesearch.activity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,7 +56,6 @@ public class Article {
                 e.printStackTrace();
             }
         }
-
         return articles;
     }
 }

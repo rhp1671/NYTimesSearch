@@ -1,0 +1,144 @@
+package com.kennard.nytimesearch.utility;
+
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+import kennard.com.nytimessearch.R;
+
+/**
+ * Created by raprasad on 9/28/16.
+ */
+public class Utility {
+    public static final String DATE_FORMAT = "yyyyMMMdd";
+
+    public static String getFormattedMonthDay(Context context, long dateInMillis) {
+        SimpleDateFormat dbDateFormat = new SimpleDateFormat(DATE_FORMAT);
+        SimpleDateFormat monthDayFormat = new SimpleDateFormat("MMMM dd");
+        String monthDayString = monthDayFormat.format(dateInMillis);
+        return monthDayString;
+    }
+
+    public static String getFriendlyDayString(Context context, long dateInMillis) {
+        // The day string for forecast uses the following logic:
+        // For today: "Today, June 8"
+        // For tomorrow:  "Tomorrow"
+        // For the next 5 days: "Wednesday" (just the day name)
+        // For all days after that: "Mon Jun 8"
+
+
+        Date todayDate = Calendar.getInstance().getTime();
+        Calendar currentTime = Calendar.getInstance();
+        currentTime.setTime(todayDate);
+
+        Date inputDate = new Date(dateInMillis);
+        Calendar inputTime = Calendar.getInstance();
+        inputTime.setTime(inputDate);
+
+        int inputDay = inputTime.get(Calendar.DAY_OF_YEAR);
+        int currentDay = currentTime.get(Calendar.DAY_OF_YEAR);
+
+        String dateStr = getFormattedMonthDay(context, dateInMillis);
+        String todayStr = getDbDateString(todayDate);
+
+
+        // If the date we're building the String for is today's date, the format
+        // is "Today, June 24"
+        if (inputDay == currentDay) {
+            String today = context.getString(R.string.today);
+            int formatId = R.string.format_full_friendly_date;
+            return String.format(context.getString(
+                    formatId,
+                    today,
+                    dateStr));
+        } else {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(todayDate);
+            cal.add(Calendar.DATE, 7);
+            String weekFutureString = getDbDateString(cal.getTime());
+
+            if (dateStr.compareTo(weekFutureString) < 0) {
+                // If the input date is less than a week in the future, just return the day name.
+                return getDayName(context, dateStr);
+            } else {
+                // Otherwise, use the form "Mon Jun 3"
+                SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
+                return shortenedDateFormat.format(inputDate);
+            }
+        }
+    }
+
+
+    public static String getDayName(Context context, String dateStr) {
+        SimpleDateFormat dbDateFormat = new SimpleDateFormat(Utility.DATE_FORMAT);
+        try {
+            Date inputDate = dbDateFormat.parse(dateStr);
+            Date todayDate = Calendar.getInstance().getTime();
+            // If the date is today, return the localized version of "Today" instead of the actual
+            // day name.
+            if (getDbDateString(todayDate).equals(dateStr)) {
+                return context.getString(R.string.today);
+            } else {
+                // If the date is set for tomorrow, the format is "Tomorrow".
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(todayDate);
+                cal.add(Calendar.DATE, 1);
+                Date tomorrowDate = cal.getTime();
+                if (getDbDateString(tomorrowDate).equals(
+                        dateStr)) {
+                    return context.getString(R.string.tomorrow);
+                } else {
+                    // Otherwise, the format is just the day of the week (e.g "Wednesday".
+                    SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE");
+                    return dayFormat.format(inputDate);
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            // It couldn't process the date correctly.
+            return "";
+        }
+    }
+
+    public static String getDbDateString(Date date) {
+        // Because the API returns a unix timestamp (measured in seconds),
+        // it must be converted to milliseconds in order to be converted to valid date.
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+        return sdf.format(date);
+    }
+
+    public static Date getDateFromDb(String dateString) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
+        try {
+            return simpleDateFormat.parse(dateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String formatDateTime(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(date);
+    }
+
+    public static Date formatDateTime(String date) {
+        try {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
+
+    public static Boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager)  context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
+}
