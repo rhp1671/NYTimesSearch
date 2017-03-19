@@ -22,8 +22,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import kennard.com.nytimessearch.R;
 
-import com.kennard.nytimesearch.utility.NYTSearchHelper;
-import com.kennard.nytimesearch.utility.SettingsUtil;
+import com.kennard.nytimesearch.network.NYTimesNetworkHelper;
+import com.kennard.nytimesearch.utility.ArticlePrefs;
 import com.kennard.nytimesearch.utility.Utility;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -75,7 +75,7 @@ public class SettingsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         ButterKnife.bind(this);
 
-        SettingsUtil util = new SettingsUtil(getApplicationContext());
+        ArticlePrefs util = new ArticlePrefs(getApplicationContext());
         String sNewsParam = util.newsDeskValueString;
         String sSortOrder = util.sortOrderString;
         long l = util.timeinms;
@@ -130,9 +130,9 @@ public class SettingsActivity extends AppCompatActivity {
 
     public void onSettingsSave(View view) {
 
-        String s = NYTSearchHelper.QueryStringBuiler(cbArts.isChecked() ? ARTS: "", cbSports.isChecked() ? SPORTS : "", cbFashion.isChecked() ? FASHION: "");
+        String s = NYTimesNetworkHelper.QueryStringBuiler(cbArts.isChecked() ? ARTS: "", cbSports.isChecked() ? SPORTS : "", cbFashion.isChecked() ? FASHION: "");
 
-        SettingsUtil util = new SettingsUtil(getApplicationContext());
+        ArticlePrefs util = new ArticlePrefs(getApplicationContext());
 
         String selSortValue = "";
         if (spSortOrder.getSelectedItemPosition() != 0) {

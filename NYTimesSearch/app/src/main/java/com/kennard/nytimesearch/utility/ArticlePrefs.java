@@ -9,15 +9,13 @@ import java.util.Date;
 
 import kennard.com.nytimessearch.R;
 
-import static android.os.Build.VERSION_CODES.N;
 import static com.kennard.nytimesearch.activity.SettingsActivity.SHAREDPREFS;
-import static kennard.com.nytimessearch.R.id.spSortOrder;
 
 /**
  * Created by raprasad on 3/17/17.
  */
 
-public class SettingsUtil {
+public class ArticlePrefs {
 
     public String newsDeskValueString;
     public long timeinms;
@@ -25,17 +23,18 @@ public class SettingsUtil {
     SharedPreferences sharedPref;
     private Context mContext;
     private  boolean isValidateNewsDeskValueString = false;
-    public static NYFilter filter;
+    public static NYTFilter filter;
 
-    public static class NYFilter {
+    public static class NYTFilter {
 
         public String newsDeskParam = "";
         public String beginDate = "";
         public String sortOrder = "";
         public String searchParam = "";
+        public int pageNo = 0;
     }
 
-    public SettingsUtil(Context context){
+    public ArticlePrefs(Context context){
 
         this.sharedPref = context.getSharedPreferences (SHAREDPREFS, Context.MODE_PRIVATE);
         this.mContext = context;
@@ -49,7 +48,7 @@ public class SettingsUtil {
             isValidateNewsDeskValueString = true;
         }
         if (filter == null) {
-            filter = new NYFilter();
+            filter = new NYTFilter();
         }
 
         if (isValidateNewsDeskValueString) {
