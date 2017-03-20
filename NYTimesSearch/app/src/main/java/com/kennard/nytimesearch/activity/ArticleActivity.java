@@ -17,6 +17,8 @@ import android.webkit.WebViewClient;
 import android.widget.ImageView;
 
 
+import com.kennard.nytimesearch.utility.ArticlePrefs;
+
 import kennard.com.nytimessearch.R;
 
 public class ArticleActivity extends AppCompatActivity {
@@ -32,8 +34,10 @@ public class ArticleActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-       // getSupportActionBar().setTitle(getResources().getString(R.string.action_settings));
 
+        if (!ArticlePrefs.title.isEmpty()) {
+            getSupportActionBar().setTitle(ArticlePrefs.title);
+        }
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

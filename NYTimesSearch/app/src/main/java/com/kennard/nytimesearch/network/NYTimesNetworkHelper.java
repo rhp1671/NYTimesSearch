@@ -36,9 +36,7 @@ public class NYTimesNetworkHelper {
         if (params.length > 0) {
             builder.append("news_desk:(");
             for (int i = 0; i < params.length - 1; i++) {
-                if (!params[i].isEmpty()) {
                     builder.append(params[i] + " ");
-                }
             }
             builder.append(params[params.length - 1]);
             builder.append(")");
@@ -50,7 +48,7 @@ public class NYTimesNetworkHelper {
     public NYTimesNetworkHelper(SearchActivity activity) {
         this.mActivity = activity;
     }
-    
+
 
     public static Retrofit getClient() {
         if (retrofit == null) {

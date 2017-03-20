@@ -1,7 +1,9 @@
 package com.kennard.nytimesearch.activity;
 
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -23,10 +25,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kennard.com.nytimessearch.R;
+import kennard.com.nytimessearch.databinding.SearchActivityBinding;
 
 import static kennard.com.nytimessearch.R.id.rvResults;
 
-public class SearchActivity extends AppCompatActivity {
+
+
+public class SearchActivity extends AppCompatActivity implements SettingsDialogFragment.SettingsDialogListener {
 
     private String sSearchParam;
     ArrayList<Doc> articles;
@@ -35,17 +40,31 @@ public class SearchActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private StaggeredGridLayoutManager mLayoutManager;
-
+    SearchActivityBinding binding;
+    ArticlePrefs util;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.search_activity);
+        //setContentView(R.layout.search_activity);
+        binding = DataBindingUtil.setContentView(this, R.layout.search_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setupViews();
+        util = new ArticlePrefs(getApplicationContext());
+        getSupportActionBar().setTitle(getResources().getString(R.string.title));
 
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        util.refresh();
+        if (!ArticlePrefs.title.isEmpty()) {
+            getSupportActionBar().setSubtitle(ArticlePrefs.title);
+        }
     }
 
     protected void setupViews() {
@@ -53,12 +72,12 @@ public class SearchActivity extends AppCompatActivity {
         articles = new ArrayList<>();
         articleAdapter = new ArticleAdapter(this, articles);
 
-        mRecyclerView = (RecyclerView) (RecyclerView) findViewById(rvResults);
+        mRecyclerView = binding.rvResults;
         mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(articleAdapter);
 
-        SpacesItemDecoration decoration = new SpacesItemDecoration(5);
+        SpacesItemDecoration decoration = new SpacesItemDecoration(12);
         mRecyclerView.addItemDecoration(decoration);
 
         endlessScrollListener = new EndlessRecyclerViewScrollListener(mLayoutManager) {
@@ -113,8 +132,9 @@ public class SearchActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Intent settingsIntent = new Intent(this, SettingsActivity.class);
-            startActivity(settingsIntent);
+            //Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            //startActivity(settingsIntent);
+            showSettingsDialog();
             return true;
         }
 
@@ -122,11 +142,10 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     public void makeNetworkCall(final int pageNo) {
-
+        util.refresh();
         ArticlePrefs.NYTFilter filter = ArticlePrefs.filter;
         filter.searchParam = sSearchParam;
         filter.pageNo = pageNo;
-
         NYTimesNetworkHelper networkHelper = new NYTimesNetworkHelper(this);
         networkHelper.getArticles(filter);
     }
@@ -137,17 +156,13 @@ public class SearchActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.networkerror), Toast.LENGTH_SHORT).show();
             return;
         }
-        // 1. First, clear the array of data
         if (articles != null) {
             articles.clear();
         }
-// 2. Notify the adapter of the update
         if (articleAdapter != null) {
             articleAdapter.notifyDataSetChanged(); // or notifyItemRangeRemoved
         }
-// 3. Reset endless scroll listener when performing a new search
         endlessScrollListener.resetState();
-        ArticlePrefs util = new ArticlePrefs(getApplicationContext());
         sSearchParam = text;
         makeNetworkCall(0);
     }
@@ -160,5 +175,19 @@ public class SearchActivity extends AppCompatActivity {
                 articleAdapter.notifyItemRangeInserted(articles.size(), articles.size() - 1);
             }
         });
+    }
+
+    private void showSettingsDialog() {
+        FragmentManager fm = getSupportFragmentManager();
+        SettingsDialogFragment editDialog = SettingsDialogFragment.newInstance(null);
+        editDialog.show(fm, "fragment_alert");
+    }
+
+    @Override
+    public void onFinishEditDialog() {
+        util.refresh();
+        if (!ArticlePrefs.title.isEmpty()) {
+            getSupportActionBar().setSubtitle(ArticlePrefs.title);
+        }
     }
 }
